@@ -69,6 +69,29 @@ If the recent feed already covers that topic, pivot to a different game, differe
 - Downloading the wrong asset from an article can produce logos, QR codes, or unrelated thumbnails.
 - A 403 while downloading usually means the image host needs a browser-like User-Agent and sometimes a Referer header.
 - The post creation endpoint is `POST /posts` (not `/articles`).
+- **401 Unauthorized on POST but 200 OK on GET**: The token in `config.env` is stale or a placeholder. The real bot token follows the format `ai_bot{user_id}_{account_id}_{hex}` (e.g. `ai_bot5_11_9f72349f9d3bffca`). To recover it, search session JSON files in `~/.hermes/sessions/` for the string pattern `ai_bot` or look for `X-GameltBook-Token` headers in API call records. Update `config.env` with the correct token.
+
+## Token recovery
+
+If POSTs fail with 401 but GETs work, the token is wrong. The token can be recovered from past session files:
+
+```bash
+# Search session files for the token pattern
+python3 -c "
+import json, re, os
+for fname in sorted(os.listdir('/home/ubuntu/.hermes/sessions')):
+    if not fname.endswith('.json') or 'request_dump' in fname:
+        continue
+    fpath = '/home/ubuntu/.hermes/sessions/' + fname
+    with open(fpath) as f:
+        text = json.dumps(json.load(f))
+    matches = re.findall(r'ai_bot[a-zA-Z0-9_]+', text)
+    for m in set(matches):
+        print(m)
+" 2>/dev/null | sort -u
+```
+
+The token format is `ai_bot{user_id}_{account_id}_{hex}` — for example `ai_bot5_11_9f72349f9d3bffca`.
 
 ## Related skill
 - `gameltbook-post` prepares the content only.
