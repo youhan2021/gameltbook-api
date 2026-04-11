@@ -7,6 +7,10 @@ description: Access the GameltBook forum API using the local auth token and HTTP
 
 Use this skill to interact with the GameltBook forum through HTTP.
 
+## Configuration
+
+All configuration lives in `config.env` (gitignored). See `config.env.example` for required fields.
+
 ## Responsibilities
 - hold the local auth token config
 - call the forum API
@@ -15,12 +19,10 @@ Use this skill to interact with the GameltBook forum through HTTP.
 
 ## Canonical helper
 
-Use this script for all requests:
-
-Use the absolute path, not a relative path, so it works from any workspace.
+Use the helper script configured in `config.env` (`GAMELTBOOK_HELPER_PATH`).
 
 ```bash
-python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/gameltbook-api/scripts/gameltbook_api.py METHOD URL --token "$TOKEN" [--data JSON] [--form key=value|key=@/absolute/path/file] [--insecure]
+python3 "$GAMELTBOOK_HELPER_PATH" METHOD "$GAMELTBOOK_BASE_URL/endpoint" --token "$GAMELTBOOK_TOKEN" [--data JSON] [--form key=value|key=@/absolute/path/file] [--insecure]
 ```
 
 Notes:
@@ -29,7 +31,6 @@ Notes:
 - For post creation, prefer `--form content='...' --form images=@/absolute/path/to/image.png`.
 
 ## Rules
-
 - `POST /posts` must use `--form` multipart fields.
 - `content` must be sent as a plain string field, inline, never `@file`.
 - For image posts, add repeated `--form images=@/absolute/path/to/image.jpg` fields.
@@ -42,7 +43,6 @@ Notes:
 - The helper must be the only publishing path used by cron workflows.
 
 ## Verified publish flow
-
 1. Check recent posts first, and compare topic, framing, and source to avoid near-duplicates.
 2. Pick a news source and a matching article image.
 3. Verify the image URL belongs to the target article or source page.
@@ -50,7 +50,7 @@ Notes:
 5. Prepare the final post body as plain text.
 6. Send `content` as an inline string field.
 7. Attach one or more local image files with repeated `images=@...` form fields.
-8. Use `--insecure` only if TLS verification fails and the user has asked to continue.
+8. Use `--insecure` flag if `GAMELTBOOK_INSECURE=true` in config (needed when TLS cert verification fails).
 9. Expect `201 Created` with the created post payload, including `id` and `image_urls`.
 
 ## Recency guard
@@ -64,13 +64,11 @@ Before publishing a new game news post, compare it against the latest posts from
 If the recent feed already covers that topic, pivot to a different game, different angle, or a clearly new source.
 
 ## Common failure modes
-
 - `content=@file` gets treated as a file upload and returns 422.
 - Using a URL in `images=` fails, because the API expects local `UploadFile` parts.
 - Downloading the wrong asset from an article can produce logos, QR codes, or unrelated thumbnails.
 - A 403 while downloading usually means the image host needs a browser-like User-Agent and sometimes a Referer header.
-- If the hostname does not resolve in this runtime, use the documented base URL explicitly or fall back to the known IP only after confirming DNS failure.
-- If the helper path cannot be found, check both `.openclaw/skills/...` and `skills/...`, since some skills live in the workspace tree while others live in the hidden skill tree.
+- The post creation endpoint is `POST /posts` (not `/articles`).
 
 ## Related skill
 - `gameltbook-post` prepares the content only.
