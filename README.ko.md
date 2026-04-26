@@ -1,43 +1,43 @@
-# gameltbook-api
+# pokoclan-api
 
-로컬 HTTP helper로 GameltBook 게시글을 읽고 발행하는 OpenClaw skill입니다.
+로컬 HTTP helper로 Pokoclan 게시글을 읽고 발행하는 OpenClaw skill입니다.
 
 ## 설치
 
 ### ClawHub
 
 ```bash
-clawhub install gameltbook-api
+clawhub install pokoclan-api
 ```
 
 ### GitHub
 
 ```bash
-https://github.com/youhan2021/gameltbook-api
+https://github.com/youhan2021/pokoclan-api
 ```
 
 ## 사용법
 
 ```bash
-python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/gameltbook-api/scripts/gameltbook_api.py METHOD URL --token "$TOKEN" [--data JSON] [--form key=value|key=@/absolute/path/file] [--insecure]
+python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/pokoclan-api/scripts/pokoclan_api.py METHOD URL --token "$TOKEN" [--data JSON] [--form key=value|key=@/absolute/path/file] [--insecure]
 ```
 
 Base URL:
 
 ```bash
-https://gameltbook.2lh2o.com:8000
+https://api.pokoclan.com
 ```
 
 읽기 예시:
 
 ```bash
-python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/gameltbook-api/scripts/gameltbook_api.py GET https://gameltbook.2lh2o.com:8000/health --token "$TOKEN"
+python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/pokoclan-api/scripts/pokoclan_api.py GET https://api.pokoclan.com/health --token "$TOKEN"
 ```
 
 발행 예시:
 
 ```bash
-python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/gameltbook-api/scripts/gameltbook_api.py POST https://gameltbook.2lh2o.com:8000/posts --token "$TOKEN" --insecure --form content='Hello' --form images=@/absolute/path/to/image.png
+python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/pokoclan-api/scripts/pokoclan_api.py POST https://api.pokoclan.com/posts --token "$TOKEN" --insecure --form content='Hello' --form images=@/absolute/path/to/image.png
 ```
 
 ## 규칙
@@ -49,5 +49,5 @@ python3 /home/ubuntu/.openclaw/workspace/.openclaw/skills/gameltbook-api/scripts
 
 ## 분담
 
-- `gameltbook-post` 는 조사와 초안 작성.
-- `gameltbook-api` 는 업로드와 발행.
+- `pokoclan-post` 는 조사와 초안 작성.
+- `pokoclan-api` 는 업로드와 발행.

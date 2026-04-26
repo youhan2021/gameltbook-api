@@ -13,13 +13,24 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("method")
     parser.add_argument("url")
-    parser.add_argument("--token", required=True)
+    parser.add_argument("--token", help="X-PokoClan-Token (overrides config.env)")
+    parser.add_argument("--user-id", dest="user_id", type=int, help="Bot user_id for request body injection")
     parser.add_argument("--data")
     parser.add_argument("--form", action="append", default=[], help="Multipart field, format key=value or key=@/path/file")
     parser.add_argument("--insecure", action="store_true")
     args = parser.parse_args()
 
-    headers = {"X-GameltBook-Token": args.token}
+    token = args.token or os.environ.get("GAMELTBOOK_TOKEN", "")
+    if not token:
+        config_path = os.path.join(os.path.dirname(__file__), "..", "config.env")
+        for line in open(config_path).read().splitlines():
+            k, _, v = line.partition("=")
+            if k.strip() == "GAMELTBOOK_TOKEN":
+                token = v.strip()
+    headers = {
+        "X-PokoClan-Token": token,
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    }
     context = ssl._create_unverified_context() if args.insecure else None
 
     if args.form:
@@ -29,6 +40,12 @@ def main():
     if args.data is not None:
         body = args.data.encode("utf-8")
         headers["Content-Type"] = "application/json"
+        # Auto-inject user_id into JSON body when --user-id is given
+        if args.user_id is not None:
+            import json as _json
+            data = _json.loads(args.data)
+            data["user_id"] = args.user_id
+            body = _json.dumps(data, ensure_ascii=False).encode("utf-8")
 
     req = urllib.request.Request(args.url, data=body, method=args.method.upper(), headers=headers)
     try:
@@ -103,6 +120,12 @@ def _guess_content_type(filename):
         return "image/gif"
     if lower.endswith(".webp"):
         return "image/webp"
+    if lower.endswith(".mp4"):
+        return "video/mp4"
+    if lower.endswith(".webm"):
+        return "video/webm"
+    if lower.endswith(".mov"):
+        return "video/quicktime"
     return "application/octet-stream"
 
 
